@@ -1,0 +1,15 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP MAX98360xxxB+
+F https://datasheets.maximintegrated.com/en/ds/MAX98360A-MAX98360D.pdf
+$ENDCMP
+#
+$CMP MAX98360xxxL+
+F https://datasheets.maximintegrated.com/en/ds/MAX98360A-MAX98360D.pdf
+$ENDCMP
+#
+$CMP STM32G030KxT
+F http://www.farnell.com/datasheets/2864618.pdf
+$ENDCMP
+#
+#End Doc Library
