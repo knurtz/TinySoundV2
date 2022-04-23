@@ -1,3 +1,3 @@
 (sym_lib_table
-  (lib (name TinySound)(type Legacy)(uri ${KIPRJMOD}/Symbols/TinySound.lib)(options "")(descr ""))
+  (lib (name "TinySound")(type "KiCad")(uri "${KIPRJMOD}/Symbols/TinySound.kicad_sym")(options "")(descr ""))
 )
