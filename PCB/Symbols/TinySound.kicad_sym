@@ -133,7 +133,7 @@
       (effects (font (size 1.524 1.524)) hide)
     )
     (property "Datasheet" "https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf" (id 3) (at 34.29 45.72 0)
-      (effects (font (size 1.524 1.524)))
+      (effects (font (size 1.524 1.524)) hide)
     )
     (property "ki_locked" "" (id 4) (at 0 0 0)
       (effects (font (size 1.27 1.27)))
