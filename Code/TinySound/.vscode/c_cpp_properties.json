@@ -1,0 +1,62 @@
+{
+    "configurations": [
+        {
+            "name": "Pico",
+            "includePath": [
+                "${env:PICO_SDK_PATH}\\src\\common\\**",
+                "${env:PICO_SDK_PATH}\\src\\rp2_common\\**",
+                "${env:PICO_SDK_PATH}\\src\\rp2040\\**",
+                "${workspaceFolder}\\**"
+            ],
+            "defines": [],
+            "compilerPath": "C:\\VSARM\\armcc\\10-2021.10\\bin\\arm-none-eabi-gcc.exe",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-arm",
+            "compilerArgs": [
+                "LIB_PICO_BIT_OPS=1",
+                "LIB_PICO_BIT_OPS_PICO=1",
+                "LIB_PICO_DIVIDER=1",
+                "LIB_PICO_DIVIDER_HARDWARE=1",
+                "LIB_PICO_DOUBLE=1",
+                "LIB_PICO_DOUBLE_PICO=1",
+                "LIB_PICO_FLOAT=1",
+                "LIB_PICO_FLOAT_PICO=1",
+                "LIB_PICO_INT64_OPS=1",
+                "LIB_PICO_INT64_OPS_PICO=1",
+                "LIB_PICO_MALLOC=1",
+                "LIB_PICO_MEM_OPS=1",
+                "LIB_PICO_MEM_OPS_PICO=1",
+                "LIB_PICO_PLATFORM=1",
+                "LIB_PICO_PRINTF=1",
+                "LIB_PICO_PRINTF_PICO=1",
+                "LIB_PICO_RUNTIME=1",
+                "LIB_PICO_STANDARD_LINK=1",
+                "LIB_PICO_STDIO=1",
+                "LIB_PICO_STDIO_UART=1",
+                "LIB_PICO_STDLIB=1",
+                "LIB_PICO_SYNC=1",
+                "LIB_PICO_SYNC_CORE=1",
+                "LIB_PICO_SYNC_CRITICAL_SECTION=1",
+                "LIB_PICO_SYNC_MUTEX=1",
+                "LIB_PICO_SYNC_SEM=1",
+                "LIB_PICO_TIME=1",
+                "LIB_PICO_UTIL=1",
+                "PICO_BOARD=\\\"tinysound_v2\\\"",
+                "PICO_BUILD=1",
+                "PICO_CMAKE_BUILD_TYPE=\\\"Release\\\"",
+                "PICO_COPY_TO_RAM=0",
+                "PICO_CXX_ENABLE_EXCEPTIONS=0",
+                "PICO_NO_FLASH=0",
+                "PICO_NO_HARDWARE=0",
+                "PICO_ON_DEVICE=1",
+                "PICO_PROGRAM_NAME=\\\"TinySound\\\"",
+                "PICO_PROGRAM_VERSION_STRING=\\\"0.1\\\"",
+                "PICO_TARGET_NAME=\\\"TinySound\\\"",
+                "PICO_USE_BLOCKED_RAM=0",
+                "PICO_PRINTF_ALWAYS_INCLUDED=1"
+            ]
+        }
+    ],
+    "version": 4
+}
