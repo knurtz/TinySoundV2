@@ -25,6 +25,13 @@
       "printf.h": "c",
       "dma.h": "c",
       "irq.h": "c",
-      "config_autogen.h": "c"
+      "config_autogen.h": "c",
+      "cstdlib": "c",
+      "flash.h": "c",
+      "string.h": "c",
+      "ts_shell.h": "c",
+      "platform.h": "c",
+      "version.h": "c",
+      "stdio_uart.h": "c"
     },
 }

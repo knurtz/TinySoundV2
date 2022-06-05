@@ -19,15 +19,10 @@
 #define TINYSOUND_V2
 
 // --- UART ---
-#ifndef PICO_DEFAULT_UART
 #define PICO_DEFAULT_UART 1
-#endif
-#ifndef PICO_DEFAULT_UART_TX_PIN
 #define PICO_DEFAULT_UART_TX_PIN 4
-#endif
-#ifndef PICO_DEFAULT_UART_RX_PIN
 #define PICO_DEFAULT_UART_RX_PIN 5
-#endif
+#define PICO_STDIO_DEFAULT_CRLF 0
 
 // no PICO_DEFAULT_LED_PIN ---
 
@@ -44,11 +39,12 @@
 #endif
 
 #ifndef PICO_FLASH_SIZE_BYTES
-#define PICO_FLASH_SIZE_BYTES (1 * 1024 * 1024)     // reserve 1M for actual program, rest of 16M for mass storage
+#define PICO_FLASH_SIZE_BYTES (16 * 1024 * 1024)     // reserve 1M for actual program, rest of 16M for mass storage
 #endif
 
-#ifndef PICO_RP2040_B0_SUPPORTED
-#define PICO_RP2040_B0_SUPPORTED 1
+#ifndef PICO_RP2040_B2_SUPPORTED
+#define PICO_RP2040_B2_SUPPORTED 1
 #endif
+
 
 #endif  // _BOARDS_TINYSOUND_H
