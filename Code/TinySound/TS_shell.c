@@ -6,6 +6,7 @@
 #include "hardware/irq.h"
 
 #include "TS_shell.h"
+#include "TS_audio.h"
 
 static char shell_buffer[64];
 static volatile bool shell_overflow = false;
@@ -66,11 +67,22 @@ void Shell_Restart(void)
 }
 
 bool Shell_CheckCommand(void)
-{  
-    // test with simple echo after newline
+{
     if (strchr(shell_buffer, '\n')) 
-    {
-        printf("Unknown command: %s", shell_buffer);
+    {          
+        // play sound command
+        if (strstr(shell_buffer, "play"))
+        {
+            printf("play\n");
+        }
+        // stop sound command
+        else if (strstr(shell_buffer, "stop"))
+        {
+            printf("stop\n");
+        }
+        // default: unrecognized command
+        else printf("Unknown command: %s", shell_buffer);
+
         Shell_Restart();
         return true;
     }
