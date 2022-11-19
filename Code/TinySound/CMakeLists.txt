@@ -22,17 +22,21 @@ pico_sdk_init()
 
 # Add executables
 add_executable(TinySound 
+    # Main
     TinySound.c
-    usb_descriptors.c
-    msc_disk.c
-    #TS_flash.c
+
+    # TinySound
     TS_shell.c
-    #TS_sine.c
-    #TS_audio.c
+
+    # USB
+    usb/usb_callbacks.c
+    usb/usb_descriptors.c
+    usb/msc_disk.c
 )
 
 target_include_directories(TinySound PRIVATE
     .
+    usb
 )
 
 pico_set_program_name(TinySound "TinySound")
@@ -41,8 +45,6 @@ pico_set_program_version(TinySound "0.1")
 # Add the standard library to the build
 target_link_libraries(TinySound 
     pico_stdlib
-
-    tinyusb_device
     
     hardware_dma
     hardware_pio
@@ -51,6 +53,8 @@ target_link_libraries(TinySound
     hardware_sync
 
     pico_audio_i2s
+
+    tinyusb_device
 )
 
 pico_enable_stdio_usb(TinySound 0)

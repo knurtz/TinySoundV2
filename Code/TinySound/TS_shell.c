@@ -5,6 +5,8 @@
 #include "hardware/dma.h"
 #include "hardware/irq.h"
 
+#include "tusb.h"
+
 #include "TS_shell.h"
 #include "TS_audio.h"
 
@@ -22,6 +24,7 @@ void Shell_BufferOverflow(void)
 
 void Shell_Init(void)
 {
+    /*
     // Init DMA channel
     dma_chan = dma_claim_unused_channel(true);
     dma_channel_config c = dma_channel_get_default_config(dma_chan);
@@ -45,6 +48,7 @@ void Shell_Init(void)
     // Run dma_handler() when DMA IRQ 0 is asserted
     irq_set_exclusive_handler(DMA_IRQ_0, Shell_BufferOverflow);
     irq_set_enabled(DMA_IRQ_0, true);
+    */
 
     // Start shell for the first time
     Shell_Restart();
@@ -53,45 +57,77 @@ void Shell_Init(void)
 void Shell_Restart(void)
 {
     // stop any DMA transfers
-    dma_channel_abort(dma_chan);
+    //dma_channel_abort(dma_chan);
 
     // clear receive buffer
     memset(shell_buffer, 0, sizeof(shell_buffer));
     shell_overflow = false;
     
     // echo prompt
-    printf("TinySound> ");
+    xprintf("\nTinySound> ");
 
     // restart DMA transfer
-    dma_channel_set_write_addr(dma_chan, shell_buffer, true);
+    //dma_channel_set_write_addr(dma_chan, shell_buffer, true);
 }
 
 bool Shell_CheckCommand(void)
 {
+    if (!tud_cdc_connected()) return false;
+
+    // Receive from CDC port
+    if (tud_cdc_available())
+    {
+        size_t len = strlen(shell_buffer);
+        tud_cdc_read(shell_buffer + len, sizeof(shell_buffer) - 1 - len);
+
+        // if there is still more data to receive, trigger buffer overflow
+        if (tud_cdc_available()) shell_overflow = true;
+    }
+
     if (strchr(shell_buffer, '\n')) 
-    {          
+    {
+        tud_cdc_write_str(shell_buffer);
         // play sound command
         if (strstr(shell_buffer, "play"))
         {
-            printf("play\n");
+            xprintf("play");
         }
         // stop sound command
         else if (strstr(shell_buffer, "stop"))
         {
-            printf("stop\n");
+            xprintf("stop");
         }
         // default: unrecognized command
-        else printf("Unknown command: %s", shell_buffer);
+        else xprintf("Unknown command");
 
         Shell_Restart();
         return true;
     }
 
+    //tud_cdc_write_flush();
+
     if (shell_overflow)
     {        
-        printf("Buffer overflow!\n");
+        xprintf("Buffer overflow!");
         Shell_Restart();
     }
 
+    tud_cdc_write_flush();
+
     return false;
+}
+
+// Works like normal printf, max. length 150 characters
+void xprintf(const char *fmt, ...)
+{
+    if (!tud_cdc_connected()) return;
+
+    static char buffer[151];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, sizeof(buffer), fmt, args);
+    va_end(args);
+
+    tud_cdc_write_str(buffer);
+    tud_cdc_write_flush();
 }
