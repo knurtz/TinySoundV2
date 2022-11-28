@@ -39,6 +39,8 @@ target_include_directories(TinySound PRIVATE
     usb
 )
 
+pico_set_linker_script(TinySound ${CMAKE_CURRENT_SOURCE_DIR}/custom_linker_script.ld)
+
 pico_set_program_name(TinySound "TinySound")
 pico_set_program_version(TinySound "0.1")
 

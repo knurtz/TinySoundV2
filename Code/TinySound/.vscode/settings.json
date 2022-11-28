@@ -38,6 +38,7 @@
       "audio_i2s.h": "c",
       "tusb.h": "c",
       "tusb_common.h": "c",
-      "tusb_option.h": "c"
+      "tusb_option.h": "c",
+      "board.h": "c"
     },
 }

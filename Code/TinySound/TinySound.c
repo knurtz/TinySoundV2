@@ -17,9 +17,6 @@ int main()
 {
     stdio_init_all();
     tusb_init();
-
-    //printf("Hello, world!\n");
-
     Shell_Init();
 
     gpio_init(28);

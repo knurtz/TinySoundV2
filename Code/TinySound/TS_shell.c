@@ -12,13 +12,21 @@
 
 static char shell_buffer[64];
 static volatile bool shell_overflow = false;
-static int dma_chan;
+//static int dma_chan;
+
+// Test memory locations
+
+char test0 = 40;                                                        // RAM -> address bigger than 0x20000000
+const char test1 = 50;                                                  // ??
+const char __in_flash() test2 = 60;                                     // Flash -> address between 0x10000000 and 0x10200000
+const __attribute__((section(".flashdata"))) char test3 = 70;           // Alias for the above
+const __attribute__((section(".mass_storage"))) char test4 = 80;        // Mass storage -> address bigger than or equal 0x10200000
 
 
 void Shell_BufferOverflow(void)
 {
     // Clear the interrupt request
-    dma_hw->ints0 = 1u << dma_chan;
+    //dma_hw->ints0 = 1u << dma_chan;
     shell_overflow = true;
 }
 
@@ -92,11 +100,23 @@ bool Shell_CheckCommand(void)
         {
             xprintf("play");
         }
+
         // stop sound command
         else if (strstr(shell_buffer, "stop"))
         {
             xprintf("stop");
         }
+
+        // test addresses command
+        else if (strstr(shell_buffer, "memory"))
+        {
+            xprintf("test4: %d @ 0x%x\n", test4, &test4);
+            xprintf("test0: %d @ 0x%x\n", test0, &test0);
+            xprintf("test1: %d @ 0x%x\n", test1, &test1);
+            xprintf("test2: %d @ 0x%x\n", test2, &test2);
+            xprintf("test3: %d @ 0x%x\n", test3, &test3);
+        }
+
         // default: unrecognized command
         else xprintf("Unknown command");
 
@@ -130,4 +150,5 @@ void xprintf(const char *fmt, ...)
 
     tud_cdc_write_str(buffer);
     tud_cdc_write_flush();
+    tud_task();
 }
