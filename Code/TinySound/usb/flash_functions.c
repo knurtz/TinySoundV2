@@ -64,7 +64,7 @@ uint32_t Flash_QueueWrite(uint32_t lba, uint32_t offset, uint8_t* buffer, uint32
     {            
         //for (uint32_t start_addr = lba * 512 + offset; start_addr < lba * 512 + bufsize; start_addr += 512)
 
-        xprintf("Queue %d in start section\n", lba);
+        //xprintf("Queue %d in start section\n", lba);
         memcpy(flash_start[target_sector], buffer, bufsize);
         flash_start_modified = true;
 
@@ -80,7 +80,7 @@ uint32_t Flash_QueueWrite(uint32_t lba, uint32_t offset, uint8_t* buffer, uint32
         }
 
         current_section = target_section;
-        xprintf("Queue %d in section %d\n", target_sector, target_section);
+        //xprintf("Queue %d in section %d\n", target_sector, target_section);
         memcpy(flash_section[target_sector], buffer, bufsize);
         modified_sectors |= 1 << target_sector;
 
@@ -91,7 +91,7 @@ uint32_t Flash_QueueWrite(uint32_t lba, uint32_t offset, uint8_t* buffer, uint32
 void Flash_WriteStartSection(void)
 {
     if (!flash_start_modified) return;
-    xprintf(" Write start section\n");
+    //xprintf(" Write start section\n");
 
     flash_range_erase((uint32_t)msc_disk - XIP_BASE, 8 * 512);
     flash_range_program((uint32_t)msc_disk - XIP_BASE, (uint8_t*)flash_start, 8 * 512);
@@ -101,7 +101,7 @@ void Flash_WriteStartSection(void)
 void Flash_WriteCurrentSection(void)
 {
     if (!modified_sectors) return;
-    xprintf(" Write section %d\n", current_section);
+    //xprintf(" Write section %d\n", current_section);
 
     // Fill in all sectors that haven't been modified, as they will be overwritten
     for (uint8_t sector = 0; sector < 8; sector++)
@@ -109,7 +109,7 @@ void Flash_WriteCurrentSection(void)
         if (!(modified_sectors & (1 << sector)))
         {
             memcpy(flash_section[sector], msc_disk[current_section * 8 + sector], 512);
-            xprintf("  Fill %d\n", sector);
+            //xprintf("  Fill %d\n", sector);
         }
     }
 
@@ -124,7 +124,7 @@ void Flash_WriteCycle(bool forced)
     if (!forced && time_us_32() / 1000 < last_write_time_ms + write_interval_ms) return;
     last_write_time_ms = time_us_32() / 1000;
 
-    xprintf("\nPeriodic write cycle\n");
+    //xprintf("\nPeriodic write cycle\n");
 
     Flash_WriteStartSection();
     Flash_WriteCurrentSection();

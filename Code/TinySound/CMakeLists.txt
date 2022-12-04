@@ -25,7 +25,7 @@ add_executable(TinySound
     # Main
     TinySound.c
 
-    # TinySound
+    # TinySound specific
     TS_shell.c
 
     # USB / Mass storage
