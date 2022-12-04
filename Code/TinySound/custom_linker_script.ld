@@ -21,6 +21,7 @@
     __StackLimit
     __StackTop
     __stack (== StackTop)
+    __mass_storage_start
 */
 
 MEMORY
@@ -125,6 +126,7 @@ SECTIONS
 
     /* Custom section for mass storage data */
     .mass_storage : {
+        __mass_storage_start = .;
         *(.mass_storage*)
     } > MASS_STORAGE
 

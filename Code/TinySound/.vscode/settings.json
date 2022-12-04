@@ -39,6 +39,7 @@
       "tusb.h": "c",
       "tusb_common.h": "c",
       "tusb_option.h": "c",
-      "board.h": "c"
+      "board.h": "c",
+      "msc_disk.h": "c"
     },
 }

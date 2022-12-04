@@ -5,6 +5,7 @@
 #include "hardware/gpio.h"
 
 #include "tusb.h"
+#include "flash_functions.h"
 
 #include "TS_shell.h"
 
@@ -18,6 +19,7 @@ int main()
     stdio_init_all();
     tusb_init();
     Shell_Init();
+    Flash_Init();
 
     gpio_init(28);
     gpio_set_dir(28, GPIO_OUT);
@@ -26,6 +28,7 @@ int main()
     {
         tud_task();
         Shell_CheckCommand();
+        Flash_WriteCycle(false);
 
         blink();
     }

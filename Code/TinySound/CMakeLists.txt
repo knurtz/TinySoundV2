@@ -28,10 +28,12 @@ add_executable(TinySound
     # TinySound
     TS_shell.c
 
-    # USB
+    # USB / Mass storage
     usb/usb_callbacks.c
     usb/usb_descriptors.c
     usb/msc_disk.c
+    usb/flash_functions.c
+
 )
 
 target_include_directories(TinySound PRIVATE
@@ -79,3 +81,9 @@ add_custom_command(TARGET TinySound
 )
 
 pico_add_extra_outputs(TinySound)
+
+# Custom target if we want to modify the UF2 file after compilation
+add_custom_target(main_flash
+    DEPENDS TinySound
+    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/modify_uf2.py ${CMAKE_CURRENT_SOURCE_DIR}/build/TinySound.uf2 0x10200000
+)
