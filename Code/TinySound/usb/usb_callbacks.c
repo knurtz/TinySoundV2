@@ -95,7 +95,7 @@ int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* 
 {
   //xprintf("Write %d %d %d\n", lba, offset, bufsize);
 
-  return Flash_QueueWrite(lba, offset, buffer, bufsize);
+  return Flash_WriteQueued(lba, offset, buffer, bufsize);
 }
 
 // Callback invoked when received an SCSI command not in built-in list below

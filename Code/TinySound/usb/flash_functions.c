@@ -6,12 +6,12 @@
 #include "TS_shell.h"
 
 // Keep the first section of 8 sectors permanently in RAM and only write to flash periodically and on eject.
-// This section contains FAT and root directory and are overwritten many times.
+// This section contains FAT and root directory and will be overwritten many times.
 uint8_t flash_start[8][512];
 bool flash_start_modified = false;
 
 // Another variable holds a copy of the section that has been modified last.
-// Only once a different section is accessed, the flash will be written.
+// Only once a different section is accessed will the flash be actually written.
 uint8_t flash_section[8][512];
 uint32_t current_section = 0;
 uint8_t modified_sectors = 0;
@@ -54,7 +54,7 @@ uint32_t Flash_ReadQueued(uint32_t lba, uint32_t offset, void* buffer, uint32_t 
     return bufsize;
 }
 
-uint32_t Flash_QueueWrite(uint32_t lba, uint32_t offset, uint8_t* buffer, uint32_t bufsize)
+uint32_t Flash_WriteQueued(uint32_t lba, uint32_t offset, void* buffer, uint32_t bufsize)
 {
     if (offset != 0 || bufsize != 512) return 0;
 
