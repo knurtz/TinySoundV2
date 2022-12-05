@@ -34,11 +34,15 @@ add_executable(TinySound
     usb/msc_disk.c
     usb/flash_functions.c
 
+    # FatFS
+    ff15/source/diskio.c
+    ff15/source/ff.c
 )
 
 target_include_directories(TinySound PRIVATE
     .
     usb
+    ff15/source
 )
 
 pico_set_linker_script(TinySound ${CMAKE_CURRENT_SOURCE_DIR}/custom_linker_script.ld)
@@ -77,13 +81,8 @@ add_custom_command(TARGET TinySound
     POST_BUILD
     COMMENT "Code size:"
     COMMAND arm-none-eabi-size TinySound.elf
+    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/modify_uf2.py ${CMAKE_CURRENT_SOURCE_DIR}/build/TinySound.uf2 0x10200000
     VERBATIM
 )
 
 pico_add_extra_outputs(TinySound)
-
-# Custom target if we want to modify the UF2 file after compilation
-add_custom_target(main_flash
-    DEPENDS TinySound
-    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/modify_uf2.py ${CMAKE_CURRENT_SOURCE_DIR}/build/TinySound.uf2 0x10200000
-)
