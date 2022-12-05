@@ -9,7 +9,7 @@ import json
 import os
 
 # Run cmake to generate compile_commands.json
-res = os.system("cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .")
+res = os.system("cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 . && cd ..")
 
 if res > 0:
     print("Oh no, CMake threw an error!")
@@ -29,8 +29,8 @@ properties = {
     "configurations": [
     {
         "name": "PicoAutogen",
-        "includePath": includes,
-        "defines": defines,
+        "includePath": sorted(includes),
+        "defines": sorted(defines),
         "compilerPath": compiler,
         "cStandard": "gnu17",
         "cppStandard": "gnu++14",
