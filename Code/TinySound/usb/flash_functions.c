@@ -2,6 +2,7 @@
 #include "msc_disk.h"
 #include "flash_functions.h"
 #include "hardware/flash.h"
+#include "hardware/sync.h"
 #include "TS_shell.h"
 
 // Keep the first section of 8 sectors permanently in RAM and only write to flash periodically and on eject.
@@ -93,8 +94,11 @@ void Flash_WriteStartSection(void)
     if (!flash_start_modified) return;
     //xprintf(" Write start section\n");
 
+    uint32_t ints = save_and_disable_interrupts();
     flash_range_erase((uint32_t)msc_disk - XIP_BASE, 8 * 512);
     flash_range_program((uint32_t)msc_disk - XIP_BASE, (uint8_t*)flash_start, 8 * 512);
+    restore_interrupts (ints);
+
     flash_start_modified = false;
 }
 
@@ -113,8 +117,11 @@ void Flash_WriteCurrentSection(void)
         }
     }
 
+    uint32_t ints = save_and_disable_interrupts();
     flash_range_erase((uint32_t)(msc_disk[current_section * 8]) - XIP_BASE, 8 * 512);
     flash_range_program((uint32_t)(msc_disk[current_section * 8]) - XIP_BASE, (uint8_t*)flash_section, 8 * 512);
+    restore_interrupts (ints);
+
     modified_sectors = 0;
 }
 
