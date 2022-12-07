@@ -1,7 +1,7 @@
 {
   "board": {
     "active_layer": 0,
-    "active_layer_preset": "",
+    "active_layer_preset": "Front Assembly View",
     "auto_track_width": true,
     "hidden_nets": [],
     "high_contrast_mode": 0,
@@ -36,12 +36,13 @@
       8,
       9,
       10,
-      11,
       12,
       13,
       14,
       15,
       16,
+      17,
+      18,
       19,
       20,
       21,
@@ -60,8 +61,8 @@
       35,
       36
     ],
-    "visible_layers": "00410cc_ffffffff",
-    "zone_display_mode": 0
+    "visible_layers": "00290a0_00000000",
+    "zone_display_mode": 1
   },
   "meta": {
     "filename": "TinySound_v2.kicad_prl",
