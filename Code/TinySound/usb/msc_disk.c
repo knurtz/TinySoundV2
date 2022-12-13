@@ -32,19 +32,19 @@
 
 
 const __attribute__((section(".mass_storage")))
-uint8_t msc_disk[DISK_BLOCK_NUM][DISK_BLOCK_SIZE] =
+uint8_t msc_disk[DISK_SECTOR_NUM][DISK_SECTOR_SIZE] =
 {
   //------------- Cluster0: Boot Sector -------------//
   {
       // DOS 2.0 BPB
       0xEB, 0x3C, 0x90,         // Jump instruction
       'M', 'S', 'D', 'O', 'S', '5', '.', '0',   // OEM Name: MSDOS5.0 for compatibility
-      0x00, 0x02,               // Bytes per sector: DISK_BLOCK_SIZE -> 512
+      0x00, 0x02,               // Bytes per sector: DISK_SECTOR_SIZE -> 512
       0x01,                     // Sectors per cluster: 1 -> cluster size = sector size = 512 bytes
       0x01, 0x00,               // Reserved sectors: 1
       0x01,                     // Number of FATs: 1
       0x10, 0x00,               // Max. root directory entries: 16 (more means and RDT is bigger than one block)
-      0x00, 0x08,               // Total sectors: DISK_BLOCK_NUM -> 2048
+      0x00, 0x08,               // Total sectors: DISK_SECTOR_NUM -> 2048
       0xF8,                     // Media descriptor
       0x06, 0x00,               // Sectors per FAT: 6 -> yields 6 * 512 / 1,5 = 2048 max. entries for our 2048 clusters
       

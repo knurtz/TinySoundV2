@@ -13,4 +13,6 @@ void Flash_WriteCurrentSection(void);
 
 void Flash_WriteCycle(bool forced);
 
+extern bool disk_initialized;
+
 #endif /* FLASH_FUNCTIONS_H */

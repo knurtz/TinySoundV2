@@ -20,10 +20,13 @@ uint8_t modified_sectors = 0;
 uint32_t last_write_time_ms = 0;
 uint16_t write_interval_ms = 10000;
 
+bool disk_initialized = false;
+
 void Flash_Init(void)
 {
     // Initialize the start section
     memcpy(flash_start, msc_disk, sizeof(flash_start));
+    disk_initialized = true;
 }
 
 uint32_t Flash_ReadQueued(uint32_t lba, uint32_t offset, void* buffer, uint32_t bufsize)
