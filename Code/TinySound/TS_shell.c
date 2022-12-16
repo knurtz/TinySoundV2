@@ -10,8 +10,39 @@
 #include "TS_shell.h"
 #include "TS_audio.h"
 
+#include "ff.h"
+
+FATFS fs;
+
 static char shell_buffer[64];
 static volatile bool shell_overflow = false;
+
+
+void ListFolder(const char* dir_name, uint8_t current_depth)
+{
+    DIR dir;
+    FILINFO fileinfo;
+    FRESULT res;
+
+    res = f_opendir(&dir, dir_name);
+    if (res) xprintf("opendir - Error %d\n", res);
+    res = f_readdir(&dir, &fileinfo);
+    if (res) xprintf("readdir - Error %d\n", res);
+
+    while (fileinfo.fname[0])
+    {
+        xprintf("%*s%s\n", current_depth * 2, "", fileinfo.fname);
+        if (fileinfo.fattrib & AM_DIR) 
+        {
+            size_t next_dir_length = strlen(dir_name) + strlen(fileinfo.altname) + 3;
+            char next_dir[next_dir_length];
+            snprintf(next_dir, next_dir_length - 1, "%s/%s", dir_name, fileinfo.altname);
+            ListFolder(next_dir, current_depth + 1);
+        }
+        res = f_readdir(&dir, &fileinfo);
+        if (res) xprintf("readdir - Error %d\n", res);
+    }
+}
 
 
 void Shell_BufferOverflow(void)
@@ -50,7 +81,9 @@ bool Shell_CheckCommand(void)
 
     if (strchr(shell_buffer, '\n')) 
     {
+        // Echo executed command
         tud_cdc_write_str(shell_buffer);
+
         // play sound command
         if (strstr(shell_buffer, "play"))
         {
@@ -61,6 +94,25 @@ bool Shell_CheckCommand(void)
         else if (strstr(shell_buffer, "stop"))
         {
             xprintf("stop");
+        }
+
+        // mount filesystem command
+        else if (strstr(shell_buffer, "mount"))
+        {
+            FRESULT res = f_mount(&fs, "", 1);
+            if (res == FR_OK) 
+            {
+                char vol_name[64];
+                f_getlabel("", vol_name, NULL);
+                xprintf("Mount successful: %s", vol_name);
+            }
+            else xprintf("Error: %d", res);
+        }
+
+        // show tree command
+        else if (strstr(shell_buffer, "tree"))
+        {
+            ListFolder("/", 0);
         }
 
         // default
@@ -82,6 +134,7 @@ bool Shell_CheckCommand(void)
 
     return false;
 }
+
 
 // Works like normal printf, max. length 150 characters
 void xprintf(const char *fmt, ...)

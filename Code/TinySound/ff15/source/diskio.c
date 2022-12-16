@@ -34,10 +34,9 @@ DSTATUS disk_initialize (
 	BYTE pdrv
 )
 {
-	if (pdrv != 0) return RES_NOTRDY;
-
-	if (!disk_initialized) Flash_Init();	
-	return RES_OK;
+	if (pdrv != 0) return STA_NOINIT;
+	if (!disk_initialized) Flash_Init();
+	return 0;
 }
 
 
@@ -55,8 +54,11 @@ DRESULT disk_read (
 {
 	if (pdrv != 0) return RES_NOTRDY;
 	
-	Flash_ReadQueued(sector, 0, buff, count * DISK_SECTOR_SIZE);
-	return RES_PARERR;
+	for (int i = 0; i < count; i++)
+	{
+		Flash_ReadQueued(sector + i, 0, buff + i * DISK_SECTOR_SIZE, DISK_SECTOR_SIZE);
+	}
+	return RES_OK;
 }
 
 

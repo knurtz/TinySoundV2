@@ -36,6 +36,7 @@ add_executable(TinySound
 
     # FatFS
     ff15/source/diskio.c
+    ff15/source/ffunicode.c
     ff15/source/ff.c
 )
 
