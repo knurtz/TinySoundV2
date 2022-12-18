@@ -54,6 +54,7 @@ pico_set_program_version(TinySound "0.1")
 # Add the standard library to the build
 target_link_libraries(TinySound 
     pico_stdlib
+    pico_bootsel_via_double_reset
     
     hardware_dma
     hardware_pio
@@ -70,11 +71,15 @@ pico_enable_stdio_usb(TinySound 0)
 pico_enable_stdio_uart(TinySound 1)
 
 target_compile_definitions(TinySound PRIVATE
+    # bootloader activity LED
+    PICO_BOOTSEL_VIA_DOUBLE_RESET_ACTIVITY_LED=28
     # compile time configuration of I2S
     USE_AUDIO_I2S=1
     PICO_AUDIO_I2S_DATA_PIN=22
     PICO_AUDIO_I2S_CLOCK_PIN_BASE=23
 )
+
+pico_add_extra_outputs(TinySound)
 
 # Enable a summary of used memory at the end of linking process
 target_link_options(TinySound PUBLIC "-Wl,--print-memory-usage")
@@ -82,8 +87,6 @@ add_custom_command(TARGET TinySound
     POST_BUILD
     COMMENT "Code size:"
     COMMAND arm-none-eabi-size TinySound.elf
-    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/modify_uf2.py ${CMAKE_CURRENT_SOURCE_DIR}/build/TinySound.uf2 0x10200000
+    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/modify_uf2.py ${CMAKE_CURRENT_SOURCE_DIR}/build/TinySound.uf2 0x10100000
     VERBATIM
 )
-
-pico_add_extra_outputs(TinySound)

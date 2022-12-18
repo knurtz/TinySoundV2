@@ -83,6 +83,7 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
 // Copy disk's data to buffer (up to bufsize) and return number of copied bytes.
 int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buffer, uint32_t bufsize)
 {
+  //xprintf("Read %d %d %d\n", lba, offset, bufsize);
   return Flash_ReadQueued(lba, offset, buffer, bufsize);
 }
 
@@ -91,7 +92,6 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buff
 int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* buffer, uint32_t bufsize)
 {
   //xprintf("Write %d %d %d\n", lba, offset, bufsize);
-
   return Flash_WriteQueued(lba, offset, buffer, bufsize);
 }
 

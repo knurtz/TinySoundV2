@@ -26,8 +26,8 @@
 
 MEMORY
 {
-    FLASH(rx) : ORIGIN = 0x10000000, LENGTH = 2048k
-    MASS_STORAGE(r) : ORIGIN = 0x10200000, LENGTH = 12M     /* TinySound has 16 MB flash, first 2 MB are for program, last 14 MB used for mass storage */
+    FLASH(rx) : ORIGIN = 0x10000000, LENGTH = 1024k
+    MASS_STORAGE(r) : ORIGIN = 0x10100000, LENGTH = 15M     /* TinySound has 16 MB flash, first 1 MB are for program, last 15 MB used for mass storage */
     RAM(rwx) : ORIGIN =  0x20000000, LENGTH = 256k
     SCRATCH_X(rwx) : ORIGIN = 0x20040000, LENGTH = 4k
     SCRATCH_Y(rwx) : ORIGIN = 0x20041000, LENGTH = 4k
