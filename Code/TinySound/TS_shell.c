@@ -16,6 +16,7 @@ FATFS fs;
 
 static char shell_buffer[64];
 static volatile bool shell_overflow = false;
+static bool fs_mounted = false;
 
 
 void ListFolder(const char* dir_name, uint8_t current_depth)
@@ -105,6 +106,7 @@ bool Shell_CheckCommand(void)
                 char vol_name[64];
                 f_getlabel("", vol_name, NULL);
                 xprintf("Mount successful: %s", vol_name);
+                fs_mounted = true;
             }
             else xprintf("Error: %d", res);
         }
@@ -112,7 +114,26 @@ bool Shell_CheckCommand(void)
         // show tree command
         else if (strstr(shell_buffer, "tree"))
         {
-            ListFolder("/", 0);
+            if (fs_mounted) ListFolder("/", 0);
+        }
+
+        // show file contents
+        else if (strstr(shell_buffer, "show "))
+        {
+            if (fs_mounted && strlen(shell_buffer) > 5)
+            {
+                FIL f;
+                FRESULT res = f_open(&f, shell_buffer + 5, FA_READ);
+                if (res) xprintf("Error: %d", res);
+                else
+                {
+                    char read_text[32];
+                    UINT rb;
+                    f_read(&f, read_text, 31, &rb);
+                    read_text[rb] = '\0';
+                    xprintf("%s\n", read_text);
+                }
+            }
         }
 
         // default
