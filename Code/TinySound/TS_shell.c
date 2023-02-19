@@ -8,43 +8,11 @@
 #include "tusb.h"
 
 #include "TS_shell.h"
+#include "TS_fat.h"
 #include "TS_audio.h"
-
-#include "ff.h"
-
-FATFS fs;
 
 static char shell_buffer[64];
 static volatile bool shell_overflow = false;
-static bool fs_mounted = false;
-
-
-void ListFolder(const char* dir_name, uint8_t current_depth)
-{
-    DIR dir;
-    FILINFO fileinfo;
-    FRESULT res;
-
-    res = f_opendir(&dir, dir_name);
-    if (res) xprintf("opendir - Error %d\n", res);
-    res = f_readdir(&dir, &fileinfo);
-    if (res) xprintf("readdir - Error %d\n", res);
-
-    while (fileinfo.fname[0])
-    {
-        xprintf("%*s%s\n", current_depth * 2, "", fileinfo.fname);
-        if (fileinfo.fattrib & AM_DIR) 
-        {
-            size_t next_dir_length = strlen(dir_name) + strlen(fileinfo.altname) + 3;
-            char next_dir[next_dir_length];
-            snprintf(next_dir, next_dir_length - 1, "%s/%s", dir_name, fileinfo.altname);
-            ListFolder(next_dir, current_depth + 1);
-        }
-        res = f_readdir(&dir, &fileinfo);
-        if (res) xprintf("readdir - Error %d\n", res);
-    }
-}
-
 
 void Shell_BufferOverflow(void)
 {
@@ -97,43 +65,16 @@ bool Shell_CheckCommand(void)
             xprintf("stop");
         }
 
-        // mount filesystem command
-        else if (strstr(shell_buffer, "mount"))
-        {
-            FRESULT res = f_mount(&fs, "", 1);
-            if (res == FR_OK) 
-            {
-                char vol_name[64];
-                f_getlabel("", vol_name, NULL);
-                xprintf("Mount successful: %s", vol_name);
-                fs_mounted = true;
-            }
-            else xprintf("Error: %d", res);
-        }
-
         // show tree command
         else if (strstr(shell_buffer, "tree"))
         {
-            if (fs_mounted) ListFolder("/", 0);
+            FAT_ListFolder("/", 0);
         }
 
         // show file contents
         else if (strstr(shell_buffer, "show "))
         {
-            if (fs_mounted && strlen(shell_buffer) > 5)
-            {
-                FIL f;
-                FRESULT res = f_open(&f, shell_buffer + 5, FA_READ);
-                if (res) xprintf("Error: %d", res);
-                else
-                {
-                    char read_text[32];
-                    UINT rb;
-                    f_read(&f, read_text, 31, &rb);
-                    read_text[rb] = '\0';
-                    xprintf("%s\n", read_text);
-                }
-            }
+            FAT_PrintFile(shell_buffer + 5, 64);
         }
 
         // default
