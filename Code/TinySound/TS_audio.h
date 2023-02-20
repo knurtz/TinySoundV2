@@ -1,5 +1,4 @@
 #include "pico/stdlib.h"
-#include "hardware/gpio.h"
 
 #define AUDIO_DIN   22
 #define AUDIO_LRCLK 23

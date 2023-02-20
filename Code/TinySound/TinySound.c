@@ -39,7 +39,7 @@ int main()
         Shell_CheckCommand();
         Flash_WriteCycle(false);
 
-        blink();
+        //blink();
     }
 
     return 0;

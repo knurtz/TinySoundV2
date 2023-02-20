@@ -92,12 +92,12 @@ void FAT_PrintFile(const char* filename, uint32_t len)
     f_close(&f);
 }
 
-void FAT_ReadFileToBuffer(const char* filename, uint32_t offset, uint32_t len, uint8_t* buffer)
+unsigned int FAT_ReadFileToBuffer(const char* filename, uint32_t offset, uint32_t len, uint8_t* buffer)
 {
     FRESULT res;
     UINT br;
 
-    if (!FAT_Init()) return;
+    if (!FAT_Init()) return 0;
 
     // Try to open the provided file.
     // If filename is NULL, try to work with already opened file.
@@ -108,7 +108,7 @@ void FAT_ReadFileToBuffer(const char* filename, uint32_t offset, uint32_t len, u
         if (res) 
         {
             xprintf("open error %d\n", res);
-            return;
+            return 0;
         }
     }
 
@@ -117,4 +117,6 @@ void FAT_ReadFileToBuffer(const char* filename, uint32_t offset, uint32_t len, u
 
     res = f_read(&persistent_file, buffer, len, &br);
     if (res) xprintf("read error %d\n", res);
+
+    return br;
 }
