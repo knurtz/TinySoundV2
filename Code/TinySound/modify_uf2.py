@@ -1,19 +1,22 @@
 #!/bin/env python
 
 """
-
 This tool modifies a UF2 file by cutting off all blocks outside a certain flash region, defined by a limit address.
 The program looks for the first block of data with a target address bigger or equal to the limit and only copies the blocks before this one to a new UF2 file.
 The input file therefore needs to have all blocks in sequential order to function properly.
 
 Syntax: p<thon modify_uf2.py [FILENAME] [LIMIT_ADDRESS]        # address can either be DEC or 0xHEX
-
 """
 
 import sys
+import os
+import time
 
 address_limit = 0
 filename = ""
+
+# Wait for source UF2 to fnish being written
+time.sleep(.2)
 
 try:
     filename = sys.argv[1]
@@ -35,16 +38,17 @@ except:
 source_uf2 = open(filename, "rb")
 target_uf2 = open(filename[:-4] + "_short.uf2", "wb")
 
+print("")   # Begin with empty line to seperate output
+print("Modifying file: %s" % filename)
+print("Source UF2 created %.2f seconds ago." % (time.time() - os.path.getmtime(filename)))
+print("All sections from target address 0x%x and up will not be written to flash." % address_limit)
+
 source_uf2.seek(24)             # total number of blocks is in bytes 24 - 27
 total_blocks = int.from_bytes(source_uf2.read(4), "little")
 
 old_addr = 0                    # remember the address of the last block we looked at
 last_printed_block = 0          # remember the last block number that has been printed
 wanted_blocks = 0               # count up the amount of blocks until address limit is reached
-
-print("")   # Begin with empty line to seperate output
-print("Modifying file: %s" % filename)
-print("All sections from target address 0x%x and up will not be written to flash." % address_limit)
 
 # Scan source file
 for i in range(0, total_blocks):

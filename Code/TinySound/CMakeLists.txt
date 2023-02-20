@@ -7,10 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(PICO_BOARD_HEADER_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/board")
 set(PICO_BOARD tinysound_v2)
 
-# Set location for pico extras
-set(PICO_EXTRAS_PATH "C:\\VSARM\\sdk\\pico\\pico-extras")
-
-# Pull in Raspberry Pi Pico SDK (must be before project)
+# Pull in Raspberry Pi Pico SDK
 include(pico_sdk_import.cmake)
 # We also need PICO EXTRAS
 include(pico_extras_import.cmake)
@@ -27,6 +24,8 @@ add_executable(TinySound
 
     # TinySound specific
     TS_shell.c
+    TS_fat.c
+    TS_audio.c
 
     # USB / Mass storage
     usb/usb_callbacks.c
@@ -34,11 +33,16 @@ add_executable(TinySound
     usb/msc_disk.c
     usb/flash_functions.c
 
+    # FatFS
+    ff15/source/diskio.c
+    ff15/source/ffunicode.c
+    ff15/source/ff.c
 )
 
 target_include_directories(TinySound PRIVATE
     .
     usb
+    ff15/source
 )
 
 pico_set_linker_script(TinySound ${CMAKE_CURRENT_SOURCE_DIR}/custom_linker_script.ld)
@@ -49,6 +53,7 @@ pico_set_program_version(TinySound "0.1")
 # Add the standard library to the build
 target_link_libraries(TinySound 
     pico_stdlib
+    pico_bootsel_via_double_reset
     
     hardware_dma
     hardware_pio
@@ -65,25 +70,23 @@ pico_enable_stdio_usb(TinySound 0)
 pico_enable_stdio_uart(TinySound 1)
 
 target_compile_definitions(TinySound PRIVATE
+    # bootloader activity LED
+    PICO_BOOTSEL_VIA_DOUBLE_RESET_ACTIVITY_LED=28
     # compile time configuration of I2S
     USE_AUDIO_I2S=1
     PICO_AUDIO_I2S_DATA_PIN=22
     PICO_AUDIO_I2S_CLOCK_PIN_BASE=23
 )
 
+pico_add_extra_outputs(TinySound)
+
 # Enable a summary of used memory at the end of linking process
 target_link_options(TinySound PUBLIC "-Wl,--print-memory-usage")
+target_link_options(TinySound PUBLIC "-Wl,--no-warn-rwx-segment")
 add_custom_command(TARGET TinySound
     POST_BUILD
     COMMENT "Code size:"
     COMMAND arm-none-eabi-size TinySound.elf
+    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/modify_uf2.py ${CMAKE_CURRENT_SOURCE_DIR}/build/TinySound.uf2 0x10100000
     VERBATIM
-)
-
-pico_add_extra_outputs(TinySound)
-
-# Custom target if we want to modify the UF2 file after compilation
-add_custom_target(main_flash
-    DEPENDS TinySound
-    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/modify_uf2.py ${CMAKE_CURRENT_SOURCE_DIR}/build/TinySound.uf2 0x10200000
 )

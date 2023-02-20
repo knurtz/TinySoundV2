@@ -32,21 +32,22 @@
 
 
 const __attribute__((section(".mass_storage")))
-uint8_t msc_disk[DISK_BLOCK_NUM][DISK_BLOCK_SIZE] =
+uint8_t msc_disk[DISK_SECTOR_NUM][DISK_SECTOR_SIZE] =
 {
   //------------- Cluster0: Boot Sector -------------//
   {
-      // DOS 2.0 BPB
+      // Boot sector
       0xEB, 0x3C, 0x90,         // Jump instruction
       'M', 'S', 'D', 'O', 'S', '5', '.', '0',   // OEM Name: MSDOS5.0 for compatibility
-      0x00, 0x02,               // Bytes per sector: DISK_BLOCK_SIZE -> 512
-      0x01,                     // Sectors per cluster: 1 -> cluster size = sector size = 512 bytes
+      // DOS 2.0 BPB
+      0x00, 0x02,               // Bytes per sector: DISK_SECTOR_SIZE -> 512
+      0x08,                     // Sectors per cluster: 8 -> cluster size = sector size * 8 = 4096 bytes
       0x01, 0x00,               // Reserved sectors: 1
       0x01,                     // Number of FATs: 1
-      0x10, 0x00,               // Max. root directory entries: 16 (more means and RDT is bigger than one block)
-      0x00, 0x08,               // Total sectors: DISK_BLOCK_NUM -> 2048
+      0x30, 0x00,               // Max. root directory entries: 48 (size of root directory table: 3 blocks)
+      0x00, 0x78,               // Total sectors: DISK_SECTOR_NUM -> 30720
       0xF8,                     // Media descriptor
-      0x06, 0x00,               // Sectors per FAT: 6 -> yields 6 * 512 / 1,5 = 2048 max. entries for our 2048 clusters
+      0x0C, 0x00,               // Sectors per FAT: 12 -> yields 12 * 512 / 1,5 = 4096 entries for 4096 clusters
       
       // DOS3.31 BPB special fields
       0x01, 0x00,               // Sectors per track: 1
@@ -59,8 +60,8 @@ uint8_t msc_disk[DISK_BLOCK_NUM][DISK_BLOCK_SIZE] =
       0x00,                     // Reserved
       0x29,                     // Extended boot signature
       0x34, 0x12, 0x00, 0x00,   // Volume ID (serial number)
-      'T', 'i', 'n', 'y', 'S', 'o', 'u', 'n', 'd', ' ', ' ',     // Volume label
-      'F', 'A', 'T', '1', '2', ' ', ' ', ' ',   // File system type
+      'T', 'i', 'n', 'y', 'S', 'o', 'u', 'n', 'd', ' ', ' ',        // Volume label
+      'F', 'A', 'T', '1', '2', ' ', ' ', ' ',                       // File system type
       0x00, 0x00,
 
       // Zero up to 2 last bytes of FAT magic code
@@ -97,15 +98,15 @@ uint8_t msc_disk[DISK_BLOCK_NUM][DISK_BLOCK_SIZE] =
       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x55, 0xAA
   },
 
-  //---------- Sector1: FAT12 Table Part 1/6 ----------//
+  //---------- Sector1: FAT12 Table Part 1/12 ---------//
   {
-      0xF8, 0xFF, 0xFF, 0xFF, 0x0F, 0x00      // Cluster0 (FAT ID): 0xFF8, Cluster1 (fixed): 0xFFF, Cluster2 (first data cluster): 0xFFF, Cluster3 (empty): 0x000
+      0xF8, 0xFF, 0xFF, 0xFF, 0x0F, 0x00               // Cluster0 (FAT ID): 0xFF8, Cluster1 (fixed): 0xFFF, Cluster2 (first data cluster): 0xFFF, Cluster3 (empty): 0x000
   },
 
-  //------ Sector2-6: FAT12 Table Part 2/6 - 6/6 ------//
-  { }, { }, { }, { }, { },
+  //---- Sector2-12: FAT12 Table Part 2/12 - 12/12 ----//
+  { }, { }, { }, { }, { }, { }, { }, { }, { }, { }, { },
 
-  //------------- Sector7: Root Directory -------------//
+  //---------- Sector13: Root Directory 1/3 -----------//
   {
       // first entry is volume label
       'T' , 'i' , 'n' , 'y' , 'S' , 'o' , 'u' , 'n' , 'd' , ' ' , ' ' , 0x08, 0x00, 0x00, 0x00, 0x00,
@@ -116,6 +117,9 @@ uint8_t msc_disk[DISK_BLOCK_NUM][DISK_BLOCK_SIZE] =
       sizeof(README_CONTENTS)-1, 0x00, 0x00, 0x00 // readme's files size (4 Bytes)
   },
 
-  //--------------- Sector 8+: Files -----------------//
+  //------ Sector14-15: Root Directory 2/3 - 3/3 ------//
+  { }, { },
+
+  //----------- Sector 16+: File contents -------------//
   README_CONTENTS
 };

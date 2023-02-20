@@ -37,8 +37,8 @@ void tud_msc_inquiry_cb(uint8_t lun, uint8_t vendor_id[8], uint8_t product_id[16
   const char pid[] = "TinySound";
   const char rev[] = "0.1";
 
-  memcpy(vendor_id  , vid, strlen(vid));
-  memcpy(product_id , pid, strlen(pid));
+  memcpy(vendor_id,   vid, strlen(vid));
+  memcpy(product_id,  pid, strlen(pid));
   memcpy(product_rev, rev, strlen(rev));
 }
 
@@ -59,8 +59,8 @@ bool tud_msc_test_unit_ready_cb(uint8_t lun)
 // Invoked when received SCSI_CMD_READ_CAPACITY_10 and SCSI_CMD_READ_FORMAT_CAPACITY to determine the disk size
 void tud_msc_capacity_cb(uint8_t lun, uint32_t* block_count, uint16_t* block_size)
 {
-  *block_count = DISK_BLOCK_NUM;
-  *block_size  = DISK_BLOCK_SIZE;
+  *block_count = DISK_SECTOR_NUM;
+  *block_size  = DISK_SECTOR_SIZE;
 }
 
 // Invoked when received Start Stop Unit command
@@ -83,10 +83,8 @@ bool tud_msc_start_stop_cb(uint8_t lun, uint8_t power_condition, bool start, boo
 // Copy disk's data to buffer (up to bufsize) and return number of copied bytes.
 int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buffer, uint32_t bufsize)
 {
-  uint8_t const* addr = msc_disk[lba] + offset;
-  memcpy(buffer, addr, bufsize);
-
-  return bufsize;
+  //xprintf("Read %d %d %d\n", lba, offset, bufsize);
+  return Flash_ReadQueued(lba, offset, buffer, bufsize);
 }
 
 // Callback invoked when received WRITE10 command.
@@ -94,8 +92,7 @@ int32_t tud_msc_read10_cb(uint8_t lun, uint32_t lba, uint32_t offset, void* buff
 int32_t tud_msc_write10_cb(uint8_t lun, uint32_t lba, uint32_t offset, uint8_t* buffer, uint32_t bufsize)
 {
   //xprintf("Write %d %d %d\n", lba, offset, bufsize);
-
-  return Flash_QueueWrite(lba, offset, buffer, bufsize);
+  return Flash_WriteQueued(lba, offset, buffer, bufsize);
 }
 
 // Callback invoked when received an SCSI command not in built-in list below

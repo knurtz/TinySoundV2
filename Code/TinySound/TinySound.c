@@ -10,14 +10,14 @@
 #include "TS_shell.h"
 
 
-uint32_t last_blink_time_ms = 0;
+uint32_t next_blink_ms = 0;
 uint16_t blink_interval_ms = 200;
 
 void blink(void)
 {
-    if (time_us_32() / 1000 > last_blink_time_ms + blink_interval_ms)
+    if (time_us_32() / 1000 > next_blink_ms)
     {
-        last_blink_time_ms = time_us_32() / 1000;
+        next_blink_ms += blink_interval_ms;
         gpio_put(28, !gpio_get(28));
     }
 }
@@ -44,3 +44,7 @@ int main()
 
     return 0;
 }
+
+
+void _close(void) {}
+void _lseek(void) {}
