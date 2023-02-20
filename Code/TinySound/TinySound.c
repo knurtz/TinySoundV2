@@ -44,3 +44,7 @@ int main()
 
     return 0;
 }
+
+
+void _close(void) {}
+void _lseek(void) {}

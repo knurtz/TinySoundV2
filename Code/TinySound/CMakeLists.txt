@@ -7,10 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(PICO_BOARD_HEADER_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/board")
 set(PICO_BOARD tinysound_v2)
 
-# Set location for pico extras
-set(PICO_EXTRAS_PATH "C:\\VSARM\\sdk\\pico\\pico-extras")
-
-# Pull in Raspberry Pi Pico SDK (must be before project)
+# Pull in Raspberry Pi Pico SDK
 include(pico_sdk_import.cmake)
 # We also need PICO EXTRAS
 include(pico_extras_import.cmake)
@@ -28,6 +25,7 @@ add_executable(TinySound
     # TinySound specific
     TS_shell.c
     TS_fat.c
+    TS_audio.c
 
     # USB / Mass storage
     usb/usb_callbacks.c
@@ -84,6 +82,7 @@ pico_add_extra_outputs(TinySound)
 
 # Enable a summary of used memory at the end of linking process
 target_link_options(TinySound PUBLIC "-Wl,--print-memory-usage")
+target_link_options(TinySound PUBLIC "-Wl,--no-warn-rwx-segment")
 add_custom_command(TARGET TinySound
     POST_BUILD
     COMMENT "Code size:"

@@ -8,6 +8,9 @@
 FATFS fs;
 bool fs_mounted = false;
 
+// Global file object for continuous read operations
+FIL persistent_file;
+
 bool FAT_Init(void)
 {    
     FRESULT res;
@@ -73,18 +76,45 @@ void FAT_PrintFile(const char* filename, uint32_t len)
 {
     FIL f;
     FRESULT res;
-    UINT rb;
+    UINT br;
     
     if (!FAT_Init()) return;
 
     res = f_open(&f, filename, FA_READ);
-    if (res) xprintf("read error %d\n", res);
+    if (res) xprintf("open error %d\n", res);
     else
     {
         char read_text[len + 1];
-        f_read(&f, read_text, len, &rb);
-        read_text[rb] = '\0';
+        f_read(&f, read_text, len, &br);
+        read_text[br] = '\0';
         xprintf("%s\n", read_text);
     }
     f_close(&f);
+}
+
+void FAT_ReadFileToBuffer(const char* filename, uint32_t offset, uint32_t len, uint8_t* buffer)
+{
+    FRESULT res;
+    UINT br;
+
+    if (!FAT_Init()) return;
+
+    // Try to open the provided file.
+    // If filename is NULL, try to work with already opened file.
+    if (filename)
+    {
+        f_close(&persistent_file);
+        res = f_open(&persistent_file, filename, FA_READ);
+        if (res) 
+        {
+            xprintf("open error %d\n", res);
+            return;
+        }
+    }
+
+    res = f_lseek(&persistent_file, offset);
+    if (res) xprintf("lseek error %d\n", res);
+
+    res = f_read(&persistent_file, buffer, len, &br);
+    if (res) xprintf("read error %d\n", res);
 }

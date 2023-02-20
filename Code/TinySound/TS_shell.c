@@ -74,7 +74,17 @@ bool Shell_CheckCommand(void)
         // show file contents
         else if (strstr(shell_buffer, "show "))
         {
-            FAT_PrintFile(shell_buffer + 5, 64);
+            //FAT_PrintFile(shell_buffer + 5, 64);
+            char buf[12];
+            FAT_ReadFileToBuffer(shell_buffer + 5, 3, 10, buf);
+            buf[11] = '\0';
+            xprintf("%s", buf);
+        }
+
+        // test audio
+        else if (strstr(shell_buffer, "audio "))
+        {
+            Audio_GetWaveInfo(shell_buffer + 6);
         }
 
         // default

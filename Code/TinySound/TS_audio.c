@@ -1,87 +1,122 @@
 #include "TS_audio.h"
-#include "pico/audio_i2s.h"
 #include "TS_sine.h"
+#include "TS_shell.h"
+#include "TS_fat.h"
+
+#include "wave_header.h"
 
 #include "ff.h"
+#include "pico/audio_i2s.h"
 
+// Global audio producer pool (collection of audio buffers)
+struct audio_buffer_pool *ap;
 
-void Audio_Play(void)
+void Audio_GetWaveInfo(const char* filename)
 {
+    uint8_t buf[sizeof(FILEHeader)];
+    FAT_ReadFileToBuffer(filename, 0, sizeof(FILEHeader), buf);
 
+    FILEHeader* wave_header = (FILEHeader*) &buf;
+
+    if (wave_header->riff.id != RIFF ||
+        wave_header->riff.type != WAVE ||
+        wave_header->format.id != FMT ||
+        wave_header->data.id != DATA)   xprintf("Some header IDs not as expected.\n");
+    //else xprintf("Header IDs ok.\n");
+
+    /*
+    xprintf("Wave info:\n  audioFormat:   %d\n  numChannels:   %d\n",
+            wave_header->format.audioFormat,
+            wave_header->format.numChannels);
+    
+    xprintf("  sampleRate:    %d\n  byteRate:      %d\n",
+            wave_header->format.sampleRate,
+            wave_header->format.byteRate);
+
+    xprintf("  blockAlign:    %d\n  bitsPerSample: %d",       
+            wave_header->format.blockAlign,
+            wave_header->format.bitsPerSample);
+    */
+   
+   Audio_Init();
+   Audio_Play();
 }
 
 
-struct audio_buffer_pool *init_audio() {
-
+struct audio_buffer_pool *init_audio(void)
+{
+    // This might change depending on the WAVE file
     static audio_format_t audio_format = {
         .format = AUDIO_BUFFER_FORMAT_PCM_S16,
-        .sample_freq = 48000,
+        .sample_freq = 41000,
         .channel_count = 2
     };
 
+    // This stays the same unless we decide to do more than double buffering
     static struct audio_buffer_format producer_format = {
         .format = &audio_format,
-        .sample_stride = 4
+        .sample_stride = 1        // Is this related to double buffering?
     };
 
-    struct audio_buffer_pool *producer_pool = audio_new_producer_pool(&producer_format, 1, sizeof(dac_buffer));
+    // Creates a new producer pool with the given audio format, this will be returned by this function
+    struct audio_buffer_pool *producer_pool = audio_new_producer_pool(&producer_format, 2, 512);
     
+    // COnfigure the I2S module
     struct audio_i2s_config i2s_config = {
-            .data_pin = PICO_AUDIO_I2S_DATA_PIN,
-            .clock_pin_base = PICO_AUDIO_I2S_CLOCK_PIN_BASE,
+            .data_pin = AUDIO_DIN,
+            .clock_pin_base = AUDIO_LRCLK,
             .dma_channel = 0,
             .pio_sm = 0,
     };
 
+    // Setup I2S module
     const struct audio_format *output_format;
     output_format = audio_i2s_setup(&audio_format, &i2s_config);
     
     if (!output_format) {
-        printf("PicoAudio: Unable to open audio device.\n");
-        return;
+        xprintf("PicoAudio: Unable to open audio device.\n");
+        return NULL;
     }
 
+    // Link producer pool to I2S module and enable I2S
     audio_i2s_connect(producer_pool);
     audio_i2s_set_enabled(true);
 
+    // Producer pool will be needed to feed audio data
     return producer_pool;
 }
 
 void Audio_Init(void)
 {
+    gpio_init(AUDIO_EN);
+    gpio_set_dir(AUDIO_EN, GPIO_OUT);
     gpio_put(AUDIO_EN, 1);
     sleep_ms(100);
 
-    uint32_t step = 0x200000;
-    uint32_t pos = 0;
-    uint32_t pos_max = 0x10000 * sizeof(dac_buffer);
-    uint vol = 128;
-
-    struct audio_buffer_pool *ap = init_audio();
+    ap = init_audio();
 }
 
 void Audio_Play(void)
 {
-    while (true) {
-        struct audio_buffer *buffer = take_audio_buffer(ap, true);
-        int16_t *samples = (int16_t *) buffer->buffer->bytes;
+    while (true) 
+    {
+        // Get next slot in producer pool (second parameter enables blocking)
+        audio_buffer_t *buffer = take_audio_buffer(ap, true);
+
+        // Fill buffer with next audio data
+        FAT_ReadFileToBuffer(NULL, 0, 2 * buffer->max_sample_count, buffer->buffer->bytes);
         
-        for (uint i = 0; i < buffer->max_sample_count; i++) {
-            samples[i] = (vol * sine_wave_table[pos >> 16u]) >> 8u;
-            pos += step;
-            if (pos >= pos_max) pos -= pos_max;
-        }
+        // Modify volume of all samples
+
+        
+        // Update sample count and return to producer pool
         buffer->sample_count = buffer->max_sample_count;
         give_audio_buffer(ap, buffer);
     }
 }
 
+
 void Audio_Stop(void)
 {
     
 }
-
-
-    
-
-    
