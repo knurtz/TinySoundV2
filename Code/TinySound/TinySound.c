@@ -8,6 +8,8 @@
 #include "flash_functions.h"
 
 #include "TS_shell.h"
+#include "TS_audio.h"
+#include "TS_fat.h"
 
 
 uint32_t next_blink_ms = 0;
@@ -27,19 +29,25 @@ int main()
 {
     stdio_init_all();
     tusb_init();
+
     Shell_Init();
     Flash_Init();
+    Audio_Init();
 
     gpio_init(28);
     gpio_set_dir(28, GPIO_OUT);
+
+    FAT_Init();
+    Audio_Play("preuss~1.wav");
 
     while (true)
     {
         tud_task();
         Shell_CheckCommand();
         Flash_WriteCycle(false);
+        Audio_CheckBuffer();
 
-        //blink();
+        blink();
     }
 
     return 0;

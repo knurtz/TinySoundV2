@@ -84,7 +84,7 @@ bool Shell_CheckCommand(void)
         // test audio
         else if (strstr(shell_buffer, "audio "))
         {
-            Audio_GetWaveInfo(shell_buffer + 6);
+            Audio_Play(shell_buffer + 6);
         }
 
         // default

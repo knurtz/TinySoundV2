@@ -61,10 +61,10 @@ target_link_libraries(TinySound
     hardware_flash
     hardware_sync
 
-    pico_audio_i2s
-
     tinyusb_device
 )
+
+pico_generate_pio_header(TinySound ${CMAKE_CURRENT_LIST_DIR}/audio_i2s.pio)
 
 pico_enable_stdio_usb(TinySound 0)
 pico_enable_stdio_uart(TinySound 1)
@@ -72,17 +72,13 @@ pico_enable_stdio_uart(TinySound 1)
 target_compile_definitions(TinySound PRIVATE
     # bootloader activity LED
     PICO_BOOTSEL_VIA_DOUBLE_RESET_ACTIVITY_LED=28
-    # compile time configuration of I2S
-    USE_AUDIO_I2S=1
-    PICO_AUDIO_I2S_DATA_PIN=22
-    PICO_AUDIO_I2S_CLOCK_PIN_BASE=23
 )
 
 pico_add_extra_outputs(TinySound)
 
 # Enable a summary of used memory at the end of linking process
 target_link_options(TinySound PUBLIC "-Wl,--print-memory-usage")
-target_link_options(TinySound PUBLIC "-Wl,--no-warn-rwx-segment")
+# target_link_options(TinySound PUBLIC "-Wl,--no-warn-rwx-segment")
 add_custom_command(TARGET TinySound
     POST_BUILD
     COMMENT "Code size:"
