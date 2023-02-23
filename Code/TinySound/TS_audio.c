@@ -15,63 +15,9 @@
 
 #include <string.h>
 
-#define BUFFER_SIZE 512         // number of samples
+#define BUFFER_SIZE 512                         // number of samples
 #define AUDIO_SM    0
-
-// Global audio producer pool (collection of audio buffers)
-//struct audio_buffer_pool *ap;
-
-/*
-struct audio_buffer_pool *init_audio(void)
-{
-    // This might change depending on the WAVE file
-    static audio_format_t audio_format = {
-        .format = AUDIO_BUFFER_FORMAT_PCM_S16,
-        .sample_freq = 44100,
-        .channel_count = 2
-    };
-
-    // This stays the same unless we decide to do more than double buffering
-    static struct audio_buffer_format producer_format = {
-        .format = &audio_format,
-        .sample_stride = 4        // Is this related to double buffering?
-    };
-
-    // Creates a new producer pool with the given audio format, this will be returned by this function
-    struct audio_buffer_pool *producer_pool = audio_new_producer_pool(&producer_format, 2, 512);
-
-    xprintf("Producer pool created.\n");
-    
-    // COnfigure the I2S module
-    struct audio_i2s_config i2s_config = {
-            .data_pin = AUDIO_DIN,
-            .clock_pin_base = AUDIO_LRCLK,
-            .dma_channel = 0,
-            .pio_sm = 0
-    };
-    
-    // Setup I2S module
-    const struct audio_format *output_format;
-    output_format = audio_i2s_setup(&audio_format, &i2s_config);
-    
-    if (!output_format) {
-        xprintf("PicoAudio: Unable to open audio device.\n");
-        return NULL;
-    }
-
-    xprintf("I2S setup finished.\n");
-
-    // Link producer pool to I2S module and enable I2S
-    audio_i2s_connect(producer_pool);    
-    xprintf("Producer pool connected.\n");
-
-    audio_i2s_set_enabled(true);
-    xprintf("I2S enabled.\n");
-
-    // Producer pool will be needed to feed audio data
-    return producer_pool;
-}
-*/
+#define DMA_CHANNEL 0
 
 int16_t audio_buffer[2][BUFFER_SIZE];           // 512x 16bit samples -> 1024 bytes -> 256x 32bit words
 
@@ -107,15 +53,14 @@ void Audio_Init(void)
     __mem_fence_release();
 
     // Setup DMA channel
-    uint8_t dma_channel = 0;
-    dma_channel_claim(dma_channel);
+    dma_channel_claim(DMA_CHANNEL);
 
-    dma_channel_config dma_config = dma_channel_get_default_config(dma_channel);
+    dma_channel_config dma_config = dma_channel_get_default_config(DMA_CHANNEL);
     channel_config_set_read_increment(&dma_config, true);
     channel_config_set_dreq(&dma_config, DREQ_PIO0_TX0 + AUDIO_SM);
     channel_config_set_transfer_data_size(&dma_config, DMA_SIZE_32);
 
-    dma_channel_configure(dma_channel,
+    dma_channel_configure(DMA_CHANNEL,
                           &dma_config,
                           &pio0->txf[AUDIO_SM],                 // dest:  TX buffer of PIO0, statemachine 0
                           NULL,                                 // src:   will be defined later
@@ -123,29 +68,32 @@ void Audio_Init(void)
                           false);                               // don't trigger immediately
 
     irq_add_shared_handler(DMA_IRQ_0, Audio_DMACallback, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
-    dma_irqn_set_channel_enabled(0, dma_channel, true);
+    dma_irqn_set_channel_enabled(0, DMA_CHANNEL, true);
     irq_set_enabled(DMA_IRQ_0, true);
 }
 
 
 void __isr __time_critical_func(Audio_DMACallback)(void)
 {
-    if (dma_irqn_get_channel_status(0, 0))
+    if (dma_irqn_get_channel_status(0, DMA_CHANNEL))
     {
-        dma_irqn_acknowledge_channel(0, 0);
+        dma_irqn_acknowledge_channel(0, DMA_CHANNEL);
 
         play_buffer_index = play_buffer_index ? 0 : 1;
-        dma_channel_transfer_from_buffer_now(0, audio_buffer[play_buffer_index], BUFFER_SIZE / 4);
-        buffer_empty = true;        
+        dma_channel_transfer_from_buffer_now(DMA_CHANNEL, audio_buffer[play_buffer_index], BUFFER_SIZE / 4);
+        buffer_empty = true;
     }
 }
 
 void Audio_Play(const char* filename)
-{
-    file_offset = FAT_ReadFileToBuffer(filename, 0, 512, (uint8_t*)audio_buffer[0]);
+{   
+    // Load first chunk of audio file
+    file_offset = FAT_ReadFileToBuffer(filename, 0, BUFFER_SIZE, (uint8_t*)audio_buffer[0]);
 
+    // Re-interprate first 44 bytes of audio buffer as RIFF WAVE header
     FILEHeader* wave_header = (FILEHeader*) audio_buffer[0];
 
+    // Basic checks for valid RIFF WAVE file
     if (wave_header->riff.id != RIFF ||
         wave_header->riff.type != WAVE ||
         wave_header->format.id != FMT ||
@@ -154,6 +102,8 @@ void Audio_Play(const char* filename)
         xprintf("Error - Some header IDs not as expected.\n");
         return;
     }
+
+    // TODO: check format details like sample rate, number of channels etc. and adjust I2S settings accordingly
 
     /*
     xprintf("Wave info:\n  audioFormat:   %d\n  numChannels:   %d\n",
@@ -178,11 +128,10 @@ void Audio_Play(const char* filename)
 
     // Connect buffer
     play_buffer_index = 0;
-    buffer_empty = true;        // so main rountine will also fill second half of the buffer
+    buffer_empty = true;        // so main rountine will immediately fill second half of the buffer
 
-    dma_channel_transfer_from_buffer_now(0, audio_buffer[0], BUFFER_SIZE / 4);
+    dma_channel_transfer_from_buffer_now(DMA_CHANNEL, audio_buffer[play_buffer_index], BUFFER_SIZE / 4);
     pio_sm_set_enabled(pio0, AUDIO_SM, true);
-
 }
 
 
@@ -191,7 +140,7 @@ void Audio_CheckBuffer(void)
     if (buffer_empty)
     {
         uint8_t load_buffer = play_buffer_index ? 0 : 1;
-        file_offset += FAT_ReadFileToBuffer(NULL, file_offset, 512, (uint8_t*)audio_buffer[load_buffer]);
+        file_offset += FAT_ReadFileToBuffer(NULL, file_offset, BUFFER_SIZE, (uint8_t*)audio_buffer[load_buffer]);
         buffer_empty = false;
     }
 }
