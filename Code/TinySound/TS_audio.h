@@ -13,6 +13,7 @@ void Audio_Init(void);
 void Audio_Play(const char* filename);
 void Audio_Stop(void);
 
-void Audio_CheckBuffer(void);
+bool Audio_IsPlaying(void);
 
+void Audio_CheckBuffer(void);
 void __isr __time_critical_func(Audio_DMACallback)(void);

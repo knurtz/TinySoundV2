@@ -92,6 +92,19 @@ void FAT_PrintFile(const char* filename, uint32_t len)
     f_close(&f);
 }
 
+uint32_t FAT_GetFilesize(const char* filename)
+{
+    FRESULT res;
+    FIL f;
+
+    if (!FAT_Init()) return 0;
+
+    res = f_open(&f, filename, FA_READ);
+    if (res) return 0;
+
+    return f_size(&f);
+}
+
 unsigned int FAT_ReadFileToBuffer(const char* filename, uint32_t offset, uint32_t len, uint8_t* buffer)
 {
     FRESULT res;

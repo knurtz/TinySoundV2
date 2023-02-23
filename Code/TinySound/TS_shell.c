@@ -53,20 +53,8 @@ bool Shell_CheckCommand(void)
         // Echo executed command
         tud_cdc_write_str(shell_buffer);
 
-        // play sound command
-        if (strstr(shell_buffer, "play"))
-        {
-            xprintf("play");
-        }
-
-        // stop sound command
-        else if (strstr(shell_buffer, "stop"))
-        {
-            xprintf("stop");
-        }
-
         // show tree command
-        else if (strstr(shell_buffer, "tree"))
+        if (strstr(shell_buffer, "tree"))
         {
             FAT_ListFolder("/", 0);
         }
@@ -74,17 +62,22 @@ bool Shell_CheckCommand(void)
         // show file contents
         else if (strstr(shell_buffer, "show "))
         {
-            //FAT_PrintFile(shell_buffer + 5, 64);
             char buf[12];
             FAT_ReadFileToBuffer(shell_buffer + 5, 3, 10, buf);
             buf[11] = '\0';
             xprintf("%s", buf);
         }
 
-        // test audio
-        else if (strstr(shell_buffer, "audio "))
+        // play audio
+        else if (strstr(shell_buffer, "play "))
         {
-            Audio_Play(shell_buffer + 6);
+            Audio_Play(shell_buffer + 5);
+        }
+
+        // stop audio
+        else if (strstr(shell_buffer, "stop"))
+        {
+            Audio_Stop();
         }
 
         // default

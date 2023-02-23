@@ -25,6 +25,8 @@ static bool buffer_empty = false;
 uint8_t play_buffer_index = 0;
 
 uint32_t file_offset;
+uint32_t file_size;
+bool playing = false;
 
 static void Audio_UpdateFrequency(uint32_t sample_freq)
 {
@@ -87,6 +89,10 @@ void __isr __time_critical_func(Audio_DMACallback)(void)
 
 void Audio_Play(const char* filename)
 {   
+    // Check minimum file size
+    file_size = FAT_GetFilesize(filename);
+    if (file_size < BUFFER_SIZE) return;
+
     // Load first chunk of audio file
     file_offset = FAT_ReadFileToBuffer(filename, 0, BUFFER_SIZE, (uint8_t*)audio_buffer[0]);
 
@@ -132,13 +138,23 @@ void Audio_Play(const char* filename)
 
     dma_channel_transfer_from_buffer_now(DMA_CHANNEL, audio_buffer[play_buffer_index], BUFFER_SIZE / 4);
     pio_sm_set_enabled(pio0, AUDIO_SM, true);
+
+    playing = true;
 }
 
 
 void Audio_CheckBuffer(void)
 {
-    if (buffer_empty)
+    if (playing && buffer_empty)
     {
+        // Check for end of file
+        if (file_size - file_offset < BUFFER_SIZE) 
+        {
+            Audio_Stop();
+            return;
+        }
+
+        // Fill buffer
         uint8_t load_buffer = play_buffer_index ? 0 : 1;
         file_offset += FAT_ReadFileToBuffer(NULL, file_offset, BUFFER_SIZE, (uint8_t*)audio_buffer[load_buffer]);
         buffer_empty = false;
@@ -148,5 +164,12 @@ void Audio_CheckBuffer(void)
 
 void Audio_Stop(void)
 {
-    
+    if (!playing) return;
+    pio_sm_set_enabled(pio0, AUDIO_SM, false);
+    playing = false;
+}
+
+bool Audio_IsPlaying(void)
+{
+    return playing;
 }
