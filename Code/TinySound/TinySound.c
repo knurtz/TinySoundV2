@@ -35,8 +35,14 @@ int main()
     Flash_Init();
     Audio_Init();
 
+    // Init LED output (GPIO3)
     gpio_init(28);
     gpio_set_dir(28, GPIO_OUT);
+
+    // Init play trigger input (GPIO2)
+    gpio_init(18);
+    gpio_set_dir(18, GPIO_IN);
+    gpio_pull_up(18);
 
     FAT_Init();
     //Audio_Play("preuss~1.wav");
@@ -47,6 +53,11 @@ int main()
         Shell_CheckCommand();
         Flash_WriteCycle(false);
         Audio_CheckBuffer();
+
+        if (!gpio_get(18) && !Audio_IsPlaying())
+        {
+            Audio_Play("moep.wav");
+        }
 
         blink();
     }
