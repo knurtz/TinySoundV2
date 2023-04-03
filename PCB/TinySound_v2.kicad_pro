@@ -137,6 +137,10 @@
           "drill": 0.0
         },
         {
+          "diameter": 0.45,
+          "drill": 0.2
+        },
+        {
           "diameter": 0.6,
           "drill": 0.2
         },
@@ -402,7 +406,7 @@
       "idf": "",
       "netlist": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "TinySound_v2.step",
       "vrml": ""
     },
     "page_layout_descr_file": ""

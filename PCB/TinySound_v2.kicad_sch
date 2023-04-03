@@ -2482,7 +2482,7 @@
   (symbol (lib_id "LED:WS2812B") (at 205.105 116.84 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 36b342ba-77cd-4983-af16-96d120dba361)
-    (property "Reference" "D?" (id 0) (at 216.535 112.5093 0))
+    (property "Reference" "D1" (id 0) (at 216.535 112.5093 0))
     (property "Value" "WS2812B" (id 1) (at 216.535 115.0493 0))
     (property "Footprint" "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm" (id 2) (at 206.375 124.46 0)
       (effects (font (size 1.27 1.27)) (justify left top) hide)
@@ -2696,7 +2696,7 @@
   (symbol (lib_id "power:GND") (at 205.105 125.73 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 543efeb3-c8f5-4846-ae1c-1d9542bbe580)
-    (property "Reference" "#PWR?" (id 0) (at 205.105 132.08 0)
+    (property "Reference" "#PWR022" (id 0) (at 205.105 132.08 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (id 1) (at 203.962 130.1242 0))
@@ -2984,7 +2984,7 @@
   (symbol (lib_id "power:+5V") (at 205.105 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid abef0ad7-9284-4bdd-95b2-d8e5d89a9576)
-    (property "Reference" "#PWR?" (id 0) (at 205.105 111.76 0)
+    (property "Reference" "#PWR012" (id 0) (at 205.105 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (id 1) (at 205.105 104.3742 0))
@@ -3512,6 +3512,9 @@
     (path "/52a9b059-3008-4288-86cb-8b455bb0013c"
       (reference "#PWR011") (unit 1) (value "GND") (footprint "")
     )
+    (path "/abef0ad7-9284-4bdd-95b2-d8e5d89a9576"
+      (reference "#PWR012") (unit 1) (value "+5V") (footprint "")
+    )
     (path "/c9f2b931-67d5-44ed-9a3e-6c9af7b2b8a8"
       (reference "#PWR013") (unit 1) (value "GND") (footprint "")
     )
@@ -3539,14 +3542,11 @@
     (path "/633914d9-4e11-423f-a428-47cd41c350f0"
       (reference "#PWR021") (unit 1) (value "GND") (footprint "")
     )
+    (path "/543efeb3-c8f5-4846-ae1c-1d9542bbe580"
+      (reference "#PWR022") (unit 1) (value "GND") (footprint "")
+    )
     (path "/da214c8f-94bf-4af2-8be7-334883a47496"
       (reference "#PWR0101") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/543efeb3-c8f5-4846-ae1c-1d9542bbe580"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/abef0ad7-9284-4bdd-95b2-d8e5d89a9576"
-      (reference "#PWR?") (unit 1) (value "+5V") (footprint "")
     )
     (path "/f916e9cb-a39e-4de7-a5bf-5ef808aada51"
       (reference "C1") (unit 1) (value "100n") (footprint "Capacitor_SMD:C_0402_1005Metric")
@@ -3600,7 +3600,7 @@
       (reference "C18") (unit 1) (value "27p") (footprint "Capacitor_SMD:C_0402_1005Metric")
     )
     (path "/36b342ba-77cd-4983-af16-96d120dba361"
-      (reference "D?") (unit 1) (value "WS2812B") (footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
+      (reference "D1") (unit 1) (value "WS2812B") (footprint "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm")
     )
     (path "/cf0f3ea6-2132-4e45-b8a4-7fd3c9d79b1a"
       (reference "J1") (unit 1) (value "Conn_01x07") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical")
